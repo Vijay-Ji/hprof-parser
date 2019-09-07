@@ -17,7 +17,6 @@
 package edu.tufts.eaftan.hprofparser.parser;
 
 import com.google.common.base.Preconditions;
-
 import edu.tufts.eaftan.hprofparser.handler.RecordHandler;
 import edu.tufts.eaftan.hprofparser.parser.datastructures.AllocSite;
 import edu.tufts.eaftan.hprofparser.parser.datastructures.CPUSample;
@@ -28,7 +27,6 @@ import edu.tufts.eaftan.hprofparser.parser.datastructures.InstanceField;
 import edu.tufts.eaftan.hprofparser.parser.datastructures.Static;
 import edu.tufts.eaftan.hprofparser.parser.datastructures.Type;
 import edu.tufts.eaftan.hprofparser.parser.datastructures.Value;
-
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInput;
@@ -41,8 +39,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
- * Parses an hprof heap dump file in binary format.  The hprof dump file format is documented in
- * the hprof_b_spec.h file in the hprof source, which is open-source and available from Oracle.
+ * Parses an hprof heap dump file in binary format.  The hprof dump file format is documented in the
+ * hprof_b_spec.h file in the hprof source, which is open-source and available from Oracle.
  */
 public class HprofParser {
 
@@ -52,19 +50,51 @@ public class HprofParser {
   public HprofParser(RecordHandler handler) {
     this.handler = handler;
     classMap = new HashMap<Long, ClassInfo>();
-  } 
+  }
+
+  public static String readUntilNull(DataInput in) throws IOException {
+
+    int bytesRead = 0;
+    byte[] bytes = new byte[25];
+
+    while ((bytes[bytesRead] = in.readByte()) != 0) {
+      bytesRead++;
+      if (bytesRead >= bytes.length) {
+        byte[] newBytes = new byte[bytesRead + 20];
+        for (int i = 0; i < bytes.length; i++) {
+          newBytes[i] = bytes[i];
+        }
+        bytes = newBytes;
+      }
+    }
+    return new String(bytes, 0, bytesRead);
+  }
+
+  private static long readId(int idSize, DataInput in) throws IOException {
+    long id = -1;
+    if (idSize == 4) {
+      id = in.readInt();
+      id &= 0x00000000ffffffff;     // undo sign extension
+    } else if (idSize == 8) {
+      id = in.readLong();
+    } else {
+      throw new IllegalArgumentException("Invalid identifier size " + idSize);
+    }
+
+    return id;
+  }
 
   public void parse(File file) throws IOException {
 
     /* The file format looks like this:
      *
-     * header: 
+     * header:
      *   [u1]* - a null-terminated sequence of bytes representing the format
      *           name and version
      *   u4 - size of identifiers/pointers
-     *   u4 - high number of word of number of milliseconds since 0:00 GMT, 
+     *   u4 - high number of word of number of milliseconds since 0:00 GMT,
      *        1/1/70
-     *   u4 - low number of word of number of milliseconds since 0:00 GMT, 
+     *   u4 - low number of word of number of milliseconds since 0:00 GMT,
      *        1/1/70
      *
      * records:
@@ -102,24 +132,6 @@ public class HprofParser {
     handler.finished();
   }
 
-  public static String readUntilNull(DataInput in) throws IOException {
-
-    int bytesRead = 0;
-    byte[] bytes = new byte[25];
-
-    while ((bytes[bytesRead] = in.readByte()) != 0) {
-      bytesRead++;
-      if (bytesRead >= bytes.length) {
-        byte[] newBytes = new byte[bytesRead + 20];
-        for (int i=0; i<bytes.length; i++) {
-          newBytes[i] = bytes[i];
-        }
-        bytes = newBytes;
-      }
-    }
-    return new String(bytes, 0, bytesRead);
-  }
-
   /**
    * @return true if there are no more records to parse
    */
@@ -139,7 +151,7 @@ public class HprofParser {
     } catch (EOFException e) {
       return true;
     }
-    
+
     // otherwise propagate the EOFException
     int time = in.readInt();    // TODO(eaftan): we might want time passed to handler fns
     long bytesLeft = Integer.toUnsignedLong(in.readInt());
@@ -202,8 +214,8 @@ public class HprofParser {
         i2 = in.readInt();
         i3 = in.readInt();
         bytesLeft -= 12;
-        lArr1 = new long[(int) bytesLeft/idSize];
-        for (int i=0; i<lArr1.length; i++) {
+        lArr1 = new long[(int) bytesLeft / idSize];
+        for (int i = 0; i < lArr1.length; i++) {
           lArr1[i] = readId(idSize, in);
         }
         if (isFirstPass) {
@@ -222,7 +234,7 @@ public class HprofParser {
         i3 = in.readInt();    // num of sites that follow
 
         AllocSite[] allocSites = new AllocSite[i3];
-        for (int i=0; i<allocSites.length; i++) {
+        for (int i = 0; i < allocSites.length; i++) {
           b1 = in.readByte();
           i4 = in.readInt();
           i5 = in.readInt();
@@ -238,7 +250,7 @@ public class HprofParser {
         }
         break;
 
-      case 0x7: 
+      case 0x7:
         // Heap summary
         i1 = in.readInt();
         i2 = in.readInt();
@@ -306,7 +318,7 @@ public class HprofParser {
         i2 = in.readInt();    // num samples that follow
 
         CPUSample[] samples = new CPUSample[i2];
-        for (int i=0; i<samples.length; i++) {
+        for (int i = 0; i < samples.length; i++) {
           i3 = in.readInt();
           i4 = in.readInt();
           samples[i] = new CPUSample(i3, i4);
@@ -316,7 +328,7 @@ public class HprofParser {
         }
         break;
 
-      case 0xe: 
+      case 0xe:
         // Control settings
         i1 = in.readInt();
         s1 = in.readShort();
@@ -328,7 +340,6 @@ public class HprofParser {
       default:
         throw new HprofParserException("Unexpected top-level record type: " + tag);
     }
-    
     return false;
   }
 
@@ -343,10 +354,9 @@ public class HprofParser {
     short s1, s2, s3;
     byte b1;
     byte[] bArr1;
-    long [] lArr1;
+    long[] lArr1;
 
     switch (tag) {
-
       case -1:    // 0xFF
         // Root unknown
         l1 = readId(idSize, in);
@@ -416,7 +426,7 @@ public class HprofParser {
         }
         bytesRead += idSize + 4;
         break;
-        
+
       case 0x07:
         // Root monitor used
         l1 = readId(idSize, in);
@@ -449,13 +459,13 @@ public class HprofParser {
         l7 = readId(idSize, in);
         i2 = in.readInt();
         bytesRead += idSize * 7 + 8;
-        
+
         /* Constants */
         s1 = in.readShort();    // number of constants
         bytesRead += 2;
         Preconditions.checkState(s1 >= 0);
         Constant[] constants = new Constant[s1];
-        for (int i=0; i<s1; i++) {
+        for (int i = 0; i < s1; i++) {
           short constantPoolIndex = in.readShort();
           byte btype = in.readByte();
           bytesRead += 3;
@@ -508,6 +518,8 @@ public class HprofParser {
               bytesRead += 8;
               v = new Value<>(type, vl);
               break;
+            default:
+              break;
           }
 
           constants[i] = new Constant(constantPoolIndex, v);
@@ -518,7 +530,7 @@ public class HprofParser {
         bytesRead += 2;
         Preconditions.checkState(s2 >= 0);
         Static[] statics = new Static[s2];
-        for (int i=0; i<s2; i++) {
+        for (int i = 0; i < s2; i++) {
           long staticFieldNameStringId = readId(idSize, in);
           byte btype = in.readByte();
           bytesRead += idSize + 1;
@@ -571,6 +583,8 @@ public class HprofParser {
               bytesRead += 8;
               v = new Value<>(type, vl);
               break;
+            default:
+              break;
           }
 
           statics[i] = new Static(staticFieldNameStringId, v);
@@ -581,7 +595,7 @@ public class HprofParser {
         bytesRead += 2;
         Preconditions.checkState(s3 >= 0);
         InstanceField[] instanceFields = new InstanceField[s3];
-        for (int i=0; i<s3; i++) {
+        for (int i = 0; i < s3; i++) {
           long fieldNameStringId = readId(idSize, in);
           byte btype = in.readByte();
           bytesRead += idSize + 1;
@@ -591,8 +605,8 @@ public class HprofParser {
 
         /**
          * We need to know the types of the values in an instance record when
-         * we parse that record.  To do that we need to look up the class and 
-         * its superclasses.  So we need to store class records in a hash 
+         * we parse that record.  To do that we need to look up the class and
+         * its superclasses.  So we need to store class records in a hash
          * table.
          */
         if (isFirstPass) {
@@ -600,7 +614,7 @@ public class HprofParser {
         }
         if (isFirstPass) {
           handler.classDump(l1, i1, l2, l3, l4, l5, l6, l7, i2, constants,
-            statics, instanceFields);
+              statics, instanceFields);
         }
         break;
 
@@ -613,8 +627,8 @@ public class HprofParser {
         Preconditions.checkState(i2 >= 0);
         bArr1 = new byte[i2];
         in.readFully(bArr1);
-        
-        /** 
+
+        /**
          * because class dump records come *after* instance dump records,
          * we don't know how to interpret the values yet.  we have to
          * record the instances and process them at the end.
@@ -629,13 +643,13 @@ public class HprofParser {
       case 0x22:
         // Object array dump
         l1 = readId(idSize, in);
-        i1 = in.readInt();    
+        i1 = in.readInt();
         i2 = in.readInt();    // number of elements
         l2 = readId(idSize, in);
 
         Preconditions.checkState(i2 >= 0);
         lArr1 = new long[i2];
-        for (int i=0; i<i2; i++) {
+        for (int i = 0; i < i2; i++) {
           lArr1[i] = readId(idSize, in);
         }
         if (isFirstPass) {
@@ -655,7 +669,7 @@ public class HprofParser {
         Preconditions.checkState(i2 >= 0);
         Value<?>[] vs = new Value[i2];
         Type t = Type.hprofTypeToEnum(b1);
-        for (int i=0; i<vs.length; i++) {
+        for (int i = 0; i < vs.length; i++) {
           switch (t) {
             case OBJ:
               long vobj = readId(idSize, in);
@@ -702,8 +716,10 @@ public class HprofParser {
               vs[i] = new Value<>(t, vlong);
               bytesRead += 8;
               break;
+            default:
+              break;
           }
-        } 
+        }
         if (isFirstPass) {
           handler.primArrayDump(l1, i1, b1, vs);
         }
@@ -714,7 +730,7 @@ public class HprofParser {
     }
 
     return bytesRead;
-    
+
   }
 
   private void processInstance(Instance i, int idSize) throws IOException {
@@ -767,6 +783,8 @@ public class HprofParser {
             long vl = input.readLong();
             v = new Value<>(field.type, vl);
             break;
+          default:
+            break;
         }
         values.add(v);
       }
@@ -776,26 +794,11 @@ public class HprofParser {
     handler.instanceDump(i.objId, i.stackTraceSerialNum, i.classObjId, valuesArr);
   }
 
-  private static long readId(int idSize, DataInput in) throws IOException {
-    long id = -1;
-    if (idSize == 4) {
-      id = in.readInt();
-      id &= 0x00000000ffffffff;     // undo sign extension
-    } else if (idSize == 8) {
-      id = in.readLong();
-    } else {
-      throw new IllegalArgumentException("Invalid identifier size " + idSize);
-    }
-
-    return id;
-  }
-
- 
   /* Utility */
 
   private int mySkipBytes(int n, DataInput in) throws IOException {
     int bytesRead = 0;
-    
+
     try {
       while (bytesRead < n) {
         in.readByte();
@@ -804,7 +807,7 @@ public class HprofParser {
     } catch (EOFException e) {
       // expected
     }
-    
+
     return bytesRead;
   }
 

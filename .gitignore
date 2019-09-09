@@ -4,3 +4,5 @@
 .settings
 target/*
 .idea/
+# 忽略临时文件
+temp/

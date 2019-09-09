@@ -40,7 +40,9 @@ import java.util.HashMap;
 
 /**
  * Parses an hprof heap dump file in binary format.  The hprof dump file format is documented in the
- * hprof_b_spec.h file in the hprof source, which is open-source and available from Oracle.
+ * hprof_b_spec.h file in the hprof source, which is open-source and available from Oracle. <br/>
+ * Search "HPROF_B_SPEC_H" in https://www.codesearch.cloud/openjdk/<br/>
+ * /jdk8u/jdk/src/share/demo/jvmti/hprof/hprof_b_spec.h or /jdk7u/jdk/src/share/demo/jvmti/hprof/hprof_b_spec.h
  */
 public class HprofParser {
 
@@ -49,11 +51,10 @@ public class HprofParser {
 
   public HprofParser(RecordHandler handler) {
     this.handler = handler;
-    classMap = new HashMap<Long, ClassInfo>();
+    classMap = new HashMap<>();
   }
 
   public static String readUntilNull(DataInput in) throws IOException {
-
     int bytesRead = 0;
     byte[] bytes = new byte[25];
 
@@ -61,9 +62,7 @@ public class HprofParser {
       bytesRead++;
       if (bytesRead >= bytes.length) {
         byte[] newBytes = new byte[bytesRead + 20];
-        for (int i = 0; i < bytes.length; i++) {
-          newBytes[i] = bytes[i];
-        }
+        System.arraycopy(bytes, 0, newBytes, 0, bytes.length);
         bytes = newBytes;
       }
     }
@@ -80,7 +79,6 @@ public class HprofParser {
     } else {
       throw new IllegalArgumentException("Invalid identifier size " + idSize);
     }
-
     return id;
   }
 
@@ -165,19 +163,16 @@ public class HprofParser {
     long[] lArr1;
 
     switch (tag) {
-      case 0x1:
-        // String in UTF-8
+      case 0x1: // String in UTF-8
         l1 = readId(idSize, in);
         bytesLeft -= idSize;
         bArr1 = new byte[(int) bytesLeft];
         in.readFully(bArr1);
         if (isFirstPass) {
-          handler.stringInUTF8(l1, new String(bArr1));
+          handler.stringInUtf8(l1, new String(bArr1));
         }
         break;
-
-      case 0x2:
-        // Load class
+      case 0x2: // Load class
         i1 = in.readInt();
         l1 = readId(idSize, in);
         i2 = in.readInt();
@@ -186,17 +181,13 @@ public class HprofParser {
           handler.loadClass(i1, l1, i2, l2);
         }
         break;
-
-      case 0x3:
-        // Unload class
+      case 0x3: // Unload class
         i1 = in.readInt();
         if (isFirstPass) {
           handler.unloadClass(i1);
         }
         break;
-
-      case 0x4:
-        // Stack frame
+      case 0x4: // Stack frame
         l1 = readId(idSize, in);
         l2 = readId(idSize, in);
         l3 = readId(idSize, in);
@@ -207,9 +198,7 @@ public class HprofParser {
           handler.stackFrame(l1, l2, l3, l4, i1, i2);
         }
         break;
-
-      case 0x5:
-        // Stack trace
+      case 0x5: // Stack trace
         i1 = in.readInt();
         i2 = in.readInt();
         i3 = in.readInt();
@@ -222,9 +211,7 @@ public class HprofParser {
           handler.stackTrace(i1, i2, i3, lArr1);
         }
         break;
-
-      case 0x6:
-        // Alloc sites
+      case 0x6: // Alloc sites
         s1 = in.readShort();
         f1 = in.readFloat();
         i1 = in.readInt();
@@ -242,16 +229,13 @@ public class HprofParser {
           i7 = in.readInt();
           i8 = in.readInt();
           i9 = in.readInt();
-
           allocSites[i] = new AllocSite(b1, i4, i5, i6, i7, i8, i9);
         }
         if (isFirstPass) {
           handler.allocSites(s1, f1, i1, i2, l1, l2, allocSites);
         }
         break;
-
-      case 0x7:
-        // Heap summary
+      case 0x7: // Heap summary
         i1 = in.readInt();
         i2 = in.readInt();
         l1 = in.readLong();
@@ -260,9 +244,7 @@ public class HprofParser {
           handler.heapSummary(i1, i2, l1, l2);
         }
         break;
-
-      case 0xa:
-        // Start thread
+      case 0xa: // Start thread
         i1 = in.readInt();
         l1 = readId(idSize, in);
         i2 = in.readInt();
@@ -273,17 +255,13 @@ public class HprofParser {
           handler.startThread(i1, l1, i2, l2, l3, l4);
         }
         break;
-
-      case 0xb:
-        // End thread
+      case 0xb: // End thread
         i1 = in.readInt();
         if (isFirstPass) {
           handler.endThread(i1);
         }
         break;
-
-      case 0xc:
-        // Heap dump
+      case 0xc: // Heap dump
         if (isFirstPass) {
           handler.heapDump();
         }
@@ -294,9 +272,7 @@ public class HprofParser {
           handler.heapDumpEnd();
         }
         break;
-
-      case 0x1c:
-        // Heap dump segment
+      case 0x1c: // Heap dump segment
         if (isFirstPass) {
           handler.heapDumpSegment();
         }
@@ -304,19 +280,14 @@ public class HprofParser {
           bytesLeft -= parseHeapDump(in, idSize, isFirstPass);
         }
         break;
-
-      case 0x2c:
-        // Heap dump end (of segments)
+      case 0x2c: // Heap dump end (of segments)
         if (!isFirstPass) {
           handler.heapDumpEnd();
         }
         break;
-
-      case 0xd:
-        // CPU samples
+      case 0xd: // CPU samples
         i1 = in.readInt();
         i2 = in.readInt();    // num samples that follow
-
         CPUSample[] samples = new CPUSample[i2];
         for (int i = 0; i < samples.length; i++) {
           i3 = in.readInt();
@@ -327,16 +298,13 @@ public class HprofParser {
           handler.cpuSamples(i1, samples);
         }
         break;
-
-      case 0xe:
-        // Control settings
+      case 0xe: // Control settings
         i1 = in.readInt();
         s1 = in.readShort();
         if (isFirstPass) {
           handler.controlSettings(i1, s1);
         }
         break;
-
       default:
         throw new HprofParserException("Unexpected top-level record type: " + tag);
     }
@@ -345,7 +313,6 @@ public class HprofParser {
 
   // returns number of bytes parsed
   private int parseHeapDump(DataInput in, int idSize, boolean isFirstPass) throws IOException {
-
     byte tag = in.readByte();
     int bytesRead = 1;
 
@@ -357,38 +324,31 @@ public class HprofParser {
     long[] lArr1;
 
     switch (tag) {
-      case -1:    // 0xFF
-        // Root unknown
+      case -1:    // 0xFF  Root unknown
         l1 = readId(idSize, in);
         if (isFirstPass) {
           handler.rootUnknown(l1);
         }
         bytesRead += idSize;
         break;
-
-      case 0x01:
-        // Root JNI global
+      case 0x01: // Root JNI global
         l1 = readId(idSize, in);
         l2 = readId(idSize, in);
         if (isFirstPass) {
-          handler.rootJNIGlobal(l1, l2);
+          handler.rootJniGlobal(l1, l2);
         }
         bytesRead += 2 * idSize;
         break;
-
-      case 0x02:
-        // Root JNI local
+      case 0x02: // Root JNI local
         l1 = readId(idSize, in);
         i1 = in.readInt();
         i2 = in.readInt();
         if (isFirstPass) {
-          handler.rootJNILocal(l1, i1, i2);
+          handler.rootJniLocal(l1, i1, i2);
         }
         bytesRead += idSize + 8;
         break;
-
-      case 0x03:
-        // Root Java frame
+      case 0x03: // Root Java frame
         l1 = readId(idSize, in);
         i1 = in.readInt();
         i2 = in.readInt();
@@ -397,9 +357,7 @@ public class HprofParser {
         }
         bytesRead += idSize + 8;
         break;
-
-      case 0x04:
-        // Root native stack
+      case 0x04: // Root native stack
         l1 = readId(idSize, in);
         i1 = in.readInt();
         if (isFirstPass) {
@@ -407,18 +365,14 @@ public class HprofParser {
         }
         bytesRead += idSize + 4;
         break;
-
-      case 0x05:
-        // Root sticky class
+      case 0x05: // Root sticky class
         l1 = readId(idSize, in);
         if (isFirstPass) {
           handler.rootStickyClass(l1);
         }
         bytesRead += idSize;
         break;
-
-      case 0x06:
-        // Root thread block
+      case 0x06: // Root thread block
         l1 = readId(idSize, in);
         i1 = in.readInt();
         if (isFirstPass) {
@@ -426,18 +380,14 @@ public class HprofParser {
         }
         bytesRead += idSize + 4;
         break;
-
-      case 0x07:
-        // Root monitor used
+      case 0x07: // Root monitor used
         l1 = readId(idSize, in);
         if (isFirstPass) {
           handler.rootMonitorUsed(l1);
         }
         bytesRead += idSize;
         break;
-
-      case 0x08:
-        // Root thread object
+      case 0x08: // Root thread object
         l1 = readId(idSize, in);
         i1 = in.readInt();
         i2 = in.readInt();
@@ -446,9 +396,7 @@ public class HprofParser {
         }
         bytesRead += idSize + 8;
         break;
-
-      case 0x20:
-        // Class dump
+      case 0x20: // Class dump
         l1 = readId(idSize, in);
         i1 = in.readInt();
         l2 = readId(idSize, in);
@@ -471,7 +419,6 @@ public class HprofParser {
           bytesRead += 3;
           Type type = Type.hprofTypeToEnum(btype);
           Value<?> v = null;
-
           switch (type) {
             case OBJ:
               long vid = readId(idSize, in);
@@ -618,8 +565,7 @@ public class HprofParser {
         }
         break;
 
-      case 0x21:
-        // Instance dump
+      case 0x21: // Instance dump
         l1 = readId(idSize, in);
         i1 = in.readInt();
         l2 = readId(idSize, in);    // class obj id
@@ -730,7 +676,6 @@ public class HprofParser {
     }
 
     return bytesRead;
-
   }
 
   private void processInstance(Instance i, int idSize) throws IOException {
@@ -798,7 +743,6 @@ public class HprofParser {
 
   private int mySkipBytes(int n, DataInput in) throws IOException {
     int bytesRead = 0;
-
     try {
       while (bytesRead < n) {
         in.readByte();
@@ -807,10 +751,8 @@ public class HprofParser {
     } catch (EOFException e) {
       // expected
     }
-
     return bytesRead;
   }
-
 
 }
 

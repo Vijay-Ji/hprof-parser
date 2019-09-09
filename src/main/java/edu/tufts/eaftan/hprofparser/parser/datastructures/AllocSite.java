@@ -26,8 +26,8 @@ public class AllocSite {
   public int numBytesAllocated;
   public int numInstancesAllocated;
 
-  public AllocSite(byte arrayIndicator, int classSerialNum, 
-      int stackTraceSerialNum, int numLiveBytes, int numLiveInstances, 
+  public AllocSite(byte arrayIndicator, int classSerialNum,
+      int stackTraceSerialNum, int numLiveBytes, int numLiveInstances,
       int numBytesAllocated, int numInstancesAllocated) {
 
     this.arrayIndicator = arrayIndicator;

@@ -20,26 +20,22 @@ import edu.tufts.eaftan.hprofparser.parser.HprofParserException;
 
 public enum Type {
 
-  OBJ("Object", 4), 
-  BOOL("boolean", 1), 
-  CHAR("char", 2), 
-  FLOAT("float", 4), 
-  DOUBLE("double", 8), 
-  BYTE("byte", 1), 
-  SHORT("short", 2), 
-  INT("int", 4), 
+  OBJ("Object", 4),
+  BOOL("boolean", 1),
+  CHAR("char", 2),
+  FLOAT("float", 4),
+  DOUBLE("double", 8),
+  BYTE("byte", 1),
+  SHORT("short", 2),
+  INT("int", 4),
   LONG("long", 8);
-  
+
   private final String name;
   private final int sizeInBytes;
-  
-  private Type(String name, int sizeInBytes) {
+
+  Type(String name, int sizeInBytes) {
     this.name = name;
     this.sizeInBytes = sizeInBytes;
-  }
-  
-  public int sizeInBytes() {
-    return sizeInBytes;
   }
 
   public static Type hprofTypeToEnum(byte type) {
@@ -66,7 +62,11 @@ public enum Type {
         throw new HprofParserException("Unexpected type in heap dump: " + type);
     }
   }
-  
+
+  public int sizeInBytes() {
+    return sizeInBytes;
+  }
+
   @Override
   public String toString() {
     return name;

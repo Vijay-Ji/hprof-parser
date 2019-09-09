@@ -20,14 +20,15 @@ package edu.tufts.eaftan.hprofparser.parser.datastructures;
  * This class represents a value from the Hprof file.
  */
 public class Value<T> {
+
   public final Type type;
   public final T value;
-  
+
   public Value(Type type, T value) {
-    this.value = value; 
+    this.value = value;
     this.type = type;
   }
-  
+
   @Override
   public String toString() {
     return value.toString();

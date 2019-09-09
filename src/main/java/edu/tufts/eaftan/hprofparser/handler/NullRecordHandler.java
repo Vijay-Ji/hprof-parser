@@ -24,127 +24,154 @@ import edu.tufts.eaftan.hprofparser.parser.datastructures.Static;
 import edu.tufts.eaftan.hprofparser.parser.datastructures.Value;
 
 /**
- * Base class to be used with the hprof parser.  For each record the parser encounters, it parses 
- * the record and calls the matching function in its RecordHandler class.  The RecordHandler 
- * handles each record, performing some function such as printing the record or building a graph.
- *
+ * Base class to be used with the hprof parser.  For each record the parser encounters, it parses
+ * the record and calls the matching function in its RecordHandler class.  The RecordHandler handles
+ * each record, performing some function such as printing the record or building a graph.
+ * <p>
  * The default behavior is to do nothing for any record.
  */
 public class NullRecordHandler implements RecordHandler {
 
   /* handler for file header */
-  
+
   @Override
-  public void header(String format, int idSize, long time) {}
-  
-  
+  public void header(String format, int idSize, long time) {
+  }
+
   /* handlers for top-level records */
 
   @Override
-  public void stringInUTF8(long id, String data) {}
+  public void stringInUtf8(long id, String data) {
+  }
 
   @Override
-  public void loadClass(int classSerialNum, long classObjId, 
-      int stackTraceSerialNum, long classNameStringId) {}
+  public void loadClass(int classSerialNum, long classObjId,
+      int stackTraceSerialNum, long classNameStringId) {
+  }
 
   @Override
-  public void unloadClass(int classSerialNum) {}
+  public void unloadClass(int classSerialNum) {
+  }
 
   @Override
-  public void stackFrame(long stackFrameId, long methodNameStringId, 
-      long methodSigStringId, long sourceFileNameStringId, 
-      int classSerialNum, int location) {}
+  public void stackFrame(long stackFrameId, long methodNameStringId,
+      long methodSigStringId, long sourceFileNameStringId,
+      int classSerialNum, int location) {
+  }
 
   @Override
-  public void stackTrace(int stackTraceSerialNum, int threadSerialNum, 
-      int numFrames, long[] stackFrameIds) {}
+  public void stackTrace(int stackTraceSerialNum, int threadSerialNum,
+      int numFrames, long[] stackFrameIds) {
+  }
 
   @Override
-  public void allocSites(short bitMaskFlags, float cutoffRatio, 
+  public void allocSites(short bitMaskFlags, float cutoffRatio,
       int totalLiveBytes, int totalLiveInstances, long totalBytesAllocated,
-      long totalInstancesAllocated, AllocSite[] sites) {}
+      long totalInstancesAllocated, AllocSite[] sites) {
+  }
 
   @Override
   public void heapSummary(int totalLiveBytes, int totalLiveInstances,
-      long totalBytesAllocated, long totalInstancesAllocated) {}
+      long totalBytesAllocated, long totalInstancesAllocated) {
+  }
 
   @Override
   public void startThread(int threadSerialNum, long threadObjectId,
       int stackTraceSerialNum, long threadNameStringId, long threadGroupNameId,
-      long threadParentGroupNameId) {}
+      long threadParentGroupNameId) {
+  }
 
   @Override
-  public void endThread(int threadSerialNum) {}
+  public void endThread(int threadSerialNum) {
+  }
 
   @Override
-  public void heapDump() {}
-  
-  @Override
-  public void heapDumpEnd() {}
+  public void heapDump() {
+  }
 
   @Override
-  public void heapDumpSegment() {}
+  public void heapDumpEnd() {
+  }
 
   @Override
-  public void cpuSamples(int totalNumOfSamples, CPUSample[] samples) {}
+  public void heapDumpSegment() {
+  }
 
   @Override
-  public void controlSettings(int bitMaskFlags, short stackTraceDepth) {}
+  public void cpuSamples(int totalNumOfSamples, CPUSample[] samples) {
+  }
+
+  @Override
+  public void controlSettings(int bitMaskFlags, short stackTraceDepth) {
+  }
 
 
   /* handlers for heap dump records */
 
   @Override
-  public void rootUnknown(long objId) {}
+  public void rootUnknown(long objId) {
+  }
 
   @Override
-  public void rootJNIGlobal(long objId, long JNIGlobalRefId) {}
+  public void rootJniGlobal(long objId, long jniGlobalRefId) {
+  }
 
   @Override
-  public void rootJNILocal(long objId, int threadSerialNum, int frameNum) {}
+  public void rootJniLocal(long objId, int threadSerialNum, int frameNum) {
+  }
 
   @Override
-  public void rootJavaFrame(long objId, int threadSerialNum, int frameNum) {}
+  public void rootJavaFrame(long objId, int threadSerialNum, int frameNum) {
+  }
 
   @Override
-  public void rootNativeStack(long objId, int threadSerialNum) {}
+  public void rootNativeStack(long objId, int threadSerialNum) {
+  }
 
   @Override
-  public void rootStickyClass(long objId) {}
+  public void rootStickyClass(long objId) {
+  }
 
   @Override
-  public void rootThreadBlock(long objId, int threadSerialNum) {}
+  public void rootThreadBlock(long objId, int threadSerialNum) {
+  }
 
   @Override
-  public void rootMonitorUsed(long objId) {}
+  public void rootMonitorUsed(long objId) {
+  }
 
   @Override
-  public void rootThreadObj(long objId, int threadSerialNum, 
-      int stackTraceSerialNum) {}
+  public void rootThreadObj(long objId, int threadSerialNum,
+      int stackTraceSerialNum) {
+  }
 
   @Override
-  public void classDump(long classObjId, int stackTraceSerialNum, 
+  public void classDump(long classObjId, int stackTraceSerialNum,
       long superClassObjId, long classLoaderObjId, long signersObjId,
-      long protectionDomainObjId, long reserved1, long reserved2, 
+      long protectionDomainObjId, long reserved1, long reserved2,
       int instanceSize, Constant[] constants, Static[] statics,
-      InstanceField[] instanceFields) {}
+      InstanceField[] instanceFields) {
+  }
 
   @Override
-  public void instanceDump(long objId, int stackTraceSerialNum, 
-      long classObjId, Value<?>[] instanceFieldValues) {}
+  public void instanceDump(long objId, int stackTraceSerialNum,
+      long classObjId, Value<?>[] instanceFieldValues) {
+  }
 
   @Override
-  public void objArrayDump(long objId, int stackTraceSerialNum, 
-      long elemClassObjId, long[] elems) {}
+  public void objArrayDump(long objId, int stackTraceSerialNum, long elemClassObjId, long[] elems) {
+  }
 
   @Override
-  public void primArrayDump(long objId, int stackTraceSerialNum, 
-      byte elemType, Value<?>[] elems) {}
+  public void primArrayDump(long objId, int stackTraceSerialNum,
+      byte elemType, Value<?>[] elems) {
+  }
 
-  
+
   /* handler for end of file */
-  
+
   @Override
-  public void finished() {}
-  
+  public void finished() {
+  }
+
 }

@@ -23,7 +23,7 @@ public class NonNullTest {
   
   private static final RecordHandler NULL_CHECKER_HANDLER = new NullRecordHandler() {
     @Override
-    public void stringInUTF8(long id, String data) {
+    public void stringInUtf8(long id, String data) {
       assertThat(data, notNullValue());
     }
 

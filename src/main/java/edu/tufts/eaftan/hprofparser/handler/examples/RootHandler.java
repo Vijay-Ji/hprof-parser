@@ -17,7 +17,6 @@
 package edu.tufts.eaftan.hprofparser.handler.examples;
 
 import edu.tufts.eaftan.hprofparser.handler.NullRecordHandler;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,9 +24,9 @@ import java.util.List;
  * Records the set of roots in a given heap dump.
  */
 public class RootHandler extends NullRecordHandler {
-  
+
   private List<Long> roots = new ArrayList<>(10000);
-  
+
   private void recordRoot(long objId) {
     roots.add(objId);
   }
@@ -38,12 +37,12 @@ public class RootHandler extends NullRecordHandler {
   }
 
   @Override
-  public void rootJNIGlobal(long objId, long JNIGlobalRefId) {
+  public void rootJniGlobal(long objId, long jniGlobalRefId) {
     recordRoot(objId);
   }
 
   @Override
-  public void rootJNILocal(long objId, int threadSerialNum, int frameNum) {
+  public void rootJniLocal(long objId, int threadSerialNum, int frameNum) {
     recordRoot(objId);
   }
 
@@ -76,7 +75,7 @@ public class RootHandler extends NullRecordHandler {
   public void rootThreadObj(long objId, int threadSerialNum, int stackTraceSerialNum) {
     recordRoot(objId);
   }
-  
+
   @Override
   public void finished() {
     System.out.println("Encountered " + roots.size() + " roots");
